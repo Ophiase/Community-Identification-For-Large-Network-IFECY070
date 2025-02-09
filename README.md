@@ -1,4 +1,22 @@
-# TP3
+# Louvain Homework - Large Network of Interactions
+
+Work in progress, Deadline: 27th February
+
+## Installation
+
+TODO
+
+## Execution
+
+```bash
+# demonstrations
+make demo_distribution
+make demo_generation
+
+# unit tests
+make tests
+make tests_verbose
+```
 
 ## Instructions
 
