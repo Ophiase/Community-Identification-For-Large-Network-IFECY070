@@ -3,6 +3,7 @@ import networkx as nx
 import random
 import matplotlib.pyplot as plt
 
+
 class GraphGeneration:
     @staticmethod
     def erdos_graph_p(n_vertices, probability=None) -> nx.Graph:
@@ -18,6 +19,8 @@ class GraphGeneration:
                     g.add_edge(i, j)
 
         return g
+
+    #########################################
 
     @staticmethod
     def erdos_graph_m(n_vertices, m_edges) -> nx.Graph:
@@ -37,11 +40,27 @@ class GraphGeneration:
 
         return g
 
+    #########################################
+
     @staticmethod
-    def _partition_nodes(n: int, n_partitions: int = 4) -> List[List[int]]:
+    def _partition_nodes(n_nodes: int, n_partitions: int = 4) -> List[List[int]]:
+        """
+        Partitions `n_nodes` nodes into `n_partitions` groups as evenly as possible.
+
+        Args:
+            n_nodes (int): Total number of nodes to partition.
+            n_partitions (int): Number of partitions to create. Default is 4.
+
+        Returns:
+            List[List[int]]: A list of lists, where each sublist represents a partition of nodes.
+
+        Example:
+            >>> GraphGeneration._partition_nodes(10, 3)
+            [[0, 1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        """
         groups = []
-        base = n // n_partitions
-        remainder = n % n_partitions
+        base = n_nodes // n_partitions
+        remainder = n_nodes % n_partitions
         start = 0
         for i in range(n_partitions):
             group_size = base + (1 if i < remainder else 0)
