@@ -1,9 +1,9 @@
-from typing import List
+from typing import Generator, Tuple
 import networkx as nx
 import random
 import matplotlib.pyplot as plt
-
 from logic.node_partition import NodePartion
+from logic.utils import _cartesian_product, _external_pair
 
 
 class GraphGeneration:
@@ -60,17 +60,14 @@ class GraphGeneration:
         )
 
         for group in groups:
-            for i in range(len(group)):
-                for j in range(i + 1, len(group)):
-                    if random.random() < p:
-                        g.add_edge(group[i], group[j])
+            for e1, e2 in _external_pair(len(group)):
+                if random.random() < p:
+                    g.add_edge(group[e1], group[e2])
 
-        for i in range(len(groups)):
-            for j in range(i + 1, len(groups)):
-                for u in groups[i]:
-                    for v in groups[j]:
-                        if random.random() < q:
-                            g.add_edge(u, v)
+        for group1, group2 in _external_pair(len(groups)):
+            for e1, e2 in _cartesian_product(groups[group1], groups[group2]):
+                if random.random() < q:
+                    g.add_edge(e1, e2)
         return g
 
 ###################################################################################
