@@ -14,9 +14,7 @@ class NodePartion:
         Partitions `n_nodes` nodes into `n_partitions` groups as evenly as possible.
 
         Args:
-            n_nodes (int): Total number of nodes to partition.
-            n_partitions (int): Number of partitions to create. Default is 4.
-            shuffle (bool): Whether to shuffle the nodes before partitioning. Default is True.
+            as_set (bool): Whether to returns the partitions as sets. Default is True.
 
         Returns:
             List[List[int]]: A list of lists, where each sublist represents a partition of nodes.
@@ -44,3 +42,48 @@ class NodePartion:
             start += group_size
 
         return groups
+
+    @staticmethod
+    def _compute_counters(n_nodes: int, n_partitions: int) -> List[int]:
+        """
+        Returns:
+            List[int]: A list where the ith index corresponds to the number of nodes attributed to the ith partition.
+        """
+        base = n_nodes // n_partitions
+        rem = n_nodes % n_partitions
+        return [base + (1 if i < rem else 0) for i in range(n_partitions)]
+
+    @staticmethod
+    def partition_nodes(
+        n_nodes: int,
+        n_partitions: int = 4,
+        shuffle: bool = True
+    ) -> List[int]:
+        """
+        Partitions `n_nodes` nodes into `n_partitions` groups as evenly as possible.
+
+        Returns:
+            List[int]: A list where each element represents the partition index of the corresponding node.
+
+        Example:
+            >>> NodePartition.partition_nodes(10, 3, shuffle=False)
+            [0, 0, 0, 1, 1, 1, 2, 2, 2, 2]
+            >>> NodePartition.partition_nodes(10, 3, shuffle=True)
+            [0, 1, 0, 2, 2, 1, 0, 2, 2, 1]
+        """
+
+        if not shuffle:
+            return [(n_partitions * i) // n_nodes for i in range(n_nodes)]
+
+        counters = NodePartion._compute_counters(n_nodes, n_partitions)
+        available = list(range(n_partitions))
+        result = []
+
+        for _ in range(n_nodes):
+            part = random.choice(available)
+            result.append(part)
+            counters[part] -= 1
+            if counters[part] == 0:
+                available.remove(part)
+
+        return result
