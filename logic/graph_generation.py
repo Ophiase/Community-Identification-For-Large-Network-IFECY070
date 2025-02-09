@@ -3,6 +3,8 @@ import networkx as nx
 import random
 import matplotlib.pyplot as plt
 
+from logic.node_partition import NodePartion
+
 
 class GraphGeneration:
     @staticmethod
@@ -43,49 +45,19 @@ class GraphGeneration:
     ###################################################################################
 
     @staticmethod
-    def _partition_nodes(
-        n_nodes: int,
-        n_partitions: int = 4, shuffle: bool = True
-    ) -> List[List[int]]:
-        """
-        Partitions `n_nodes` nodes into `n_partitions` groups as evenly as possible.
-
-        Args:
-            n_nodes (int): Total number of nodes to partition.
-            n_partitions (int): Number of partitions to create. Default is 4.
-            shuffle (bool): Whether to shuffle the nodes before partitioning. Default is True.
-
-        Returns:
-            List[List[int]]: A list of lists, where each sublist represents a partition of nodes.
-
-        Example:
-            >>> GraphGeneration._partition_nodes(10, 3)
-            [[0, 1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        """
-        nodes = list(range(n_nodes))
-        if shuffle:
-            random.shuffle(nodes)
-
-        groups = []
-        base = n_nodes // n_partitions
-        remainder = n_nodes % n_partitions
-        start = 0
-        for i in range(n_partitions):
-            group_size = base + (1 if i < remainder else 0)
-            groups.append(nodes[start:start + group_size])
-            start += group_size
-
-        return groups
-
-    @staticmethod
     def tp3_graph(
         n_nodes: int, p: float, q: float,
         n_partitions: int = 4, shuffle: bool = True
     ) -> nx.Graph:
         g = nx.Graph()
         g.add_nodes_from(range(n_nodes))
-        groups = GraphGeneration._partition_nodes(
-            n_nodes, n_partitions=n_partitions, shuffle=shuffle)
+
+        groups = NodePartion.partition_list(
+            n_nodes,
+            n_partitions=n_partitions,
+            shuffle=shuffle,
+            as_set=False
+        )
 
         for group in groups:
             for i in range(len(group)):
