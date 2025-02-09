@@ -45,7 +45,7 @@ class GraphGeneration:
     ###################################################################################
 
     @staticmethod
-    def tp3_graph(
+    def generate_stochastic_block_model(
         n_nodes: int, p: float, q: float,
         n_partitions: int = 4, shuffle: bool = True
     ) -> nx.Graph:
@@ -84,8 +84,8 @@ def main() -> None:
     graph_params = [
         ("Erdos-Renyi p", GraphGeneration.erdos_graph_p, (10, 0.3)),
         ("Erdos-Renyi m", GraphGeneration.erdos_graph_m, (10, 15)),
-        ("TP3 Graph", GraphGeneration.tp3_graph, (16, 0.8, 0.2, 4, True)),
-        ("TP3 Graph", GraphGeneration.tp3_graph, (50, 0.95, 0.02, 4, False))
+        ("TP3 Graph", GraphGeneration.generate_stochastic_block_model, (16, 0.8, 0.2, 4, True)),
+        ("TP3 Graph", GraphGeneration.generate_stochastic_block_model, (50, 0.95, 0.02, 4, False))
     ]
 
     plt.figure(figsize=(15, 5))
