@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 import networkx as nx
-from typing import List, Set, Dict
+from typing import List, Set, Dict, Tuple
 import random
 
 from logic.graph_generation import GraphGeneration
@@ -46,7 +46,7 @@ class CommunityIdentification:
         return neighbor_comms
 
     @staticmethod
-    def _one_level(graph: nx.Graph, partition: Dict[int, int], resolution: float) -> (Dict[int, int], bool):
+    def _one_level(graph: nx.Graph, partition: Dict[int, int], resolution: float) -> Tuple[Dict[int, int], bool]:
         """
         Perform one local moving phase of the Louvain algorithm.
         Updates the partition by moving nodes to communities that yield the highest modularity gain.
