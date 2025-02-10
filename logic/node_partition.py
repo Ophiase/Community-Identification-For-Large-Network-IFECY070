@@ -87,3 +87,14 @@ class NodePartion:
                 available.remove(part)
 
         return result
+
+    @staticmethod
+    def partition_list_to_partition_nodes(partition: List[List[int]]) -> List[int]:
+        n_nodes = sum([len(group) for group in partition])
+        result = [0 for _ in range(n_nodes)]
+
+        for which_group, group in enumerate(partition):
+            for e in group:
+                result[e] = which_group
+
+        return result

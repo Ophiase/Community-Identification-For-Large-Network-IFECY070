@@ -1,4 +1,4 @@
-from typing import Generator, Tuple
+from typing import Generator, List, Tuple
 import networkx as nx
 import random
 import matplotlib.pyplot as plt
@@ -46,53 +46,55 @@ class GraphGeneration:
 
     @staticmethod
     def generate_stochastic_block_model(
-        n_nodes: int, p: float, q: float,
-        n_partitions: int = 4, shuffle: bool = True
-    ) -> nx.Graph:
+        partition: List[List[int]],
+        p: float, q: float,
+    ) -> List[List[int]]:
+        n_nodes = sum([len(group) for group in partition])
+
         g = nx.Graph()
         g.add_nodes_from(range(n_nodes))
 
-        groups = NodePartion.partition_list(
-            n_nodes,
-            n_partitions=n_partitions,
-            shuffle=shuffle,
-            as_set=False
-        )
-
-        for group in groups:
+        # edges with a probability of p
+        for group in partition:
             for e1, e2 in _external_pair(len(group)):
                 if random.random() < p:
                     g.add_edge(group[e1], group[e2])
 
-        for group1, group2 in _external_pair(len(groups)):
-            for e1, e2 in _cartesian_product(groups[group1], groups[group2]):
+        # edges with a probability of q
+        for group1, group2 in _external_pair(len(partition)):
+            for e1, e2 in _cartesian_product(partition[group1], partition[group2]):
                 if random.random() < q:
                     g.add_edge(e1, e2)
+
         return g
 
 ###################################################################################
 
 
-def display_graph(g: nx.Graph, title: str) -> None:
-    plt.figure()
-    nx.draw(g, with_labels=True)
-    plt.title(title)
-    plt.show()
-
-
 def main() -> None:
+    partition_shuffled = NodePartion.partition_list(50, as_set=False)
+    partition_unshuffled = NodePartion.partition_list(
+        50, shuffle=False, as_set=False)
+
     graph_params = [
-        ("Erdos-Renyi p", GraphGeneration.erdos_graph_p, (10, 0.3)),
-        ("Erdos-Renyi m", GraphGeneration.erdos_graph_m, (10, 15)),
-        ("TP3 Graph", GraphGeneration.generate_stochastic_block_model, (16, 0.8, 0.2, 4, True)),
-        ("TP3 Graph", GraphGeneration.generate_stochastic_block_model, (50, 0.95, 0.02, 4, False))
+        ("Erdos-Renyi p", GraphGeneration.erdos_graph_p(10, 0.3), None),
+        ("Erdos-Renyi m", GraphGeneration.erdos_graph_m(10, 15), None),
+        ("TP3 Graph", GraphGeneration.generate_stochastic_block_model(
+            partition_shuffled, p=0.8, q=0.2), partition_shuffled),
+        ("TP3 Graph", GraphGeneration.generate_stochastic_block_model(
+            partition_unshuffled, p=0.95, q=0.02), partition_unshuffled)
     ]
 
     plt.figure(figsize=(15, 5))
-    for i, (title, graph_func, params) in enumerate(graph_params, 1):
-        g = graph_func(*params)
+    for i, (title, graph, partition) in enumerate(graph_params, 1):
         plt.subplot(1, 4, i)
-        nx.draw(g, with_labels=True)
+        if partition is not None:
+            color_map = NodePartion.partition_list_to_partition_nodes(
+                partition)
+            nx.draw(graph, node_color=color_map,
+                    with_labels=True, cmap=plt.cm.rainbow)
+        else:
+            nx.draw(graph, with_labels=True)
         plt.title(title)
     plt.show()
 
