@@ -2,7 +2,7 @@ import random
 from typing import List, Set
 
 
-class NodePartion:
+class NodePartition:
     @staticmethod
     def partition_list(
         n_nodes: int,
@@ -75,7 +75,7 @@ class NodePartion:
         if not shuffle:
             return [(n_partitions * i) // n_nodes for i in range(n_nodes)]
 
-        counters = NodePartion._compute_counters(n_nodes, n_partitions)
+        counters = NodePartition._compute_counters(n_nodes, n_partitions)
         available = list(range(n_partitions))
         result = []
 

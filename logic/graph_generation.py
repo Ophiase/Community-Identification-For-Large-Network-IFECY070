@@ -2,7 +2,7 @@ from typing import Generator, List, Tuple
 import networkx as nx
 import random
 import matplotlib.pyplot as plt
-from logic.node_partition import NodePartion
+from logic.node_partition import NodePartition
 from logic.utils import _cartesian_product, _external_pair
 
 
@@ -47,8 +47,8 @@ class GraphGeneration:
     @staticmethod
     def generate_stochastic_block_model(
         partition: List[List[int]],
-        p: float, q: float,
-    ) -> List[List[int]]:
+        p: float, q: float
+    ) -> nx.Graph:
         n_nodes = sum([len(group) for group in partition])
 
         g = nx.Graph()
@@ -72,8 +72,8 @@ class GraphGeneration:
 
 
 def main() -> None:
-    partition_shuffled = NodePartion.partition_list(50, as_set=False)
-    partition_unshuffled = NodePartion.partition_list(
+    partition_shuffled = NodePartition.partition_list(50, as_set=False)
+    partition_unshuffled = NodePartition.partition_list(
         50, shuffle=False, as_set=False)
 
     graph_params = [
@@ -89,7 +89,7 @@ def main() -> None:
     for i, (title, graph, partition) in enumerate(graph_params, 1):
         plt.subplot(1, 4, i)
         if partition is not None:
-            color_map = NodePartion.partition_list_to_partition_nodes(
+            color_map = NodePartition.partition_list_to_partition_nodes(
                 partition)
             nx.draw(graph, node_color=color_map,
                     with_labels=True, cmap=plt.cm.rainbow)
