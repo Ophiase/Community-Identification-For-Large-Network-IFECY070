@@ -1,6 +1,6 @@
 # Homework - Large Network of Interactions
 
-Work in progress, Deadline: 27th February
+Work in progress, Deadline: 6th March
 
 ## Installation
 
@@ -21,9 +21,24 @@ make tests_verbose
 ## Instructions a
 
 - Exercise 1 :
+    - $\epsilon \in ]0, 1[$
+    - 1:
+        - Can we have Erdös-Reyni $G(n, p)$ or $G(n, M)$ such that $\Delta$ (max degree) $\in O(n^{1 - \epsilon})$ 
+        - In this case, what are the clustering coefficients?
+    - 2:
+        - ✅ a function f(n, k, p, q) that generate a graph g where
+            - $V = \bigsqcup_{1 \leq i \leq 4} V_i$ 
+            - Each are sub graph $V_i$ is an Erdös-Rényi graph $G(n_i, p)$.
+            - Edges between two different communities should have a probability $q$.
+            - Eventually shuffle the nodes 
 - Exercise 2 :
-
-## Instructions b
+    - List explicitely 2 algorithms
+    - Compare them
+        - Execution time and space
+        - Use different scales
+        - Use different values of n,p,q
+        
+## Instructions b (optional)
 
 - Exercise 1 : Louvain
     - ✅ a function f(n, p, q) that generate a graph g where
