@@ -45,6 +45,20 @@ class GraphGeneration:
     ###################################################################################
 
     @staticmethod
+    def generate_stochastic_block_model_bis(
+        n_nodes: int, k_partitions: int, p: float, q: float,
+        shuffle: bool = True
+    ):
+        partition = NodePartition.partition_list(
+            n_nodes=n_nodes,
+            shuffle=shuffle,
+            n_partitions=k_partitions,
+            as_set=False
+        )
+
+        return GraphGeneration.generate_stochastic_block_model(partition, p, q)
+
+    @staticmethod
     def generate_stochastic_block_model(
         partition: List[List[int]],
         p: float, q: float
