@@ -180,7 +180,7 @@ def demo():
             as_set=False
         )
 
-        graph = GraphGeneration.generate_stochastic_block_model(
+        graph = GraphGeneration.generate_erdos_p_partition_model(
             true_partition, p, q)
 
         detected_part = CommunityIdentification.louvain(graph, resolution=1.0)
