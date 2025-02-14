@@ -1,4 +1,4 @@
-# Louvain Homework - Large Network of Interactions
+# Homework - Large Network of Interactions
 
 Work in progress, Deadline: 27th February
 
@@ -18,7 +18,12 @@ make tests
 make tests_verbose
 ```
 
-## Instructions
+## Instructions a
+
+- Exercise 1 :
+- Exercise 2 :
+
+## Instructions b
 
 - Exercise 1 : Louvain
     - ✅ a function f(n, p, q) that generate a graph g where
