@@ -33,6 +33,8 @@ make tests_verbose
             - Eventually shuffle the nodes 
 - Exercise 2 :
     - List explicitely 2 algorithms
+        - ✅ Louvain
+        - Other?
     - Compare them
         - Execution time and space
         - Use different scales
@@ -46,7 +48,7 @@ make tests_verbose
         - $\forall a, b \in V_i:$ $(a,b) \in E$ with proba $p$
         - $\forall a, b \in V_i, V_j$ s.t $i \neq j :$ $(a, b) \in E$ with proba $q$
     - ✅ a function to draw the graph
-    - Use Louvain algorithm with $p/q$ ratio.
+    - ✅ Use Louvain algorithm with $p/q$ ratio.
         - Which structures of community emerges ?
             - Use multiple tests
             - Use Images
