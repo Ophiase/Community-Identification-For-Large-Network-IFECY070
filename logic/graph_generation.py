@@ -118,6 +118,7 @@ def main() -> None:
             partition_shuffled, p=0.8, q=0.2), partition_shuffled),
         ("Partitioned Erdos-Renyi p", GraphGeneration.generate_erdos_p_partition_model(
             partition_unshuffled, p=0.95, q=0.02), partition_unshuffled),
+        
         # (
         #     "Partitioned Erdos-Renyi m", 
         #     GraphGeneration.generate_erdos_m_partition_model(partition_shuffled, m_edges=10, q=0.2), 

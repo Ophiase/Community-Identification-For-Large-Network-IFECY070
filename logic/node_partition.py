@@ -1,5 +1,11 @@
 import random
 from typing import List, Set
+from typing import Union
+
+PartitionGroupList = List[List[int]]
+PartitionListSet = List[Set[int]]
+PartitionNodes = List[int]
+Partition = Union[PartitionGroupList, PartitionListSet, PartitionNodes]
 
 
 class NodePartition:
@@ -9,7 +15,7 @@ class NodePartition:
         n_partitions: int = 4,
         shuffle: bool = True,
         as_set: bool = True
-    ) -> List[List[int] | Set[int]]:
+    ) -> PartitionGroupList | PartitionListSet:
         """
         Partitions `n_nodes` nodes into `n_partitions` groups as evenly as possible.
 
@@ -58,7 +64,7 @@ class NodePartition:
         n_nodes: int,
         n_partitions: int = 4,
         shuffle: bool = True
-    ) -> List[int]:
+    ) -> PartitionNodes:
         """
         Partitions `n_nodes` nodes into `n_partitions` groups as evenly as possible.
 
@@ -89,7 +95,7 @@ class NodePartition:
         return result
 
     @staticmethod
-    def partition_list_to_partition_nodes(partition: List[List[int]]) -> List[int]:
+    def partition_list_to_partition_nodes(partition: PartitionGroupList) -> PartitionNodes:
         n_nodes = sum([len(group) for group in partition])
         result = [0 for _ in range(n_nodes)]
 
