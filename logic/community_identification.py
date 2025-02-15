@@ -1,9 +1,10 @@
 from typing import Dict, Tuple, List
 import random
+import math
 import networkx as nx
-from matplotlib import pyplot as plt
 import numpy as np
 from scipy.optimize import linear_sum_assignment
+from matplotlib import pyplot as plt
 from logic.graph_generation import GraphGeneration
 from logic.node_partition import NodePartition
 
@@ -11,14 +12,35 @@ from logic.node_partition import NodePartition
 class CommunityIdentification:
     @staticmethod
     def _init_partition(graph: nx.Graph) -> Dict[int, int]:
+        """
+        Initialize a partition with each node in its own community.
+
+        Example:
+            Input: graph with nodes [0, 1, 2]
+            Output: {0: 0, 1: 1, 2: 2}
+        """
         return {node: node for node in graph.nodes()}
 
     @staticmethod
     def _compute_degrees(graph: nx.Graph) -> Dict[int, float]:
+        """
+        Compute the weighted degree for each node.
+
+        Example:
+            Input: graph with edge (0,1) of weight 2
+            Output: {0: 2, 1: 2} (if only one edge exists)
+        """
         return {node: graph.degree(node, weight='weight') for node in graph.nodes()}
 
     @staticmethod
     def _get_neighboring_communities(graph: nx.Graph, partition: Dict[int, int], node: int) -> Dict[int, float]:
+        """
+        Compute the total weight of edges from a given node to each neighboring community.
+
+        Example:
+            Input: node 0 with neighbor 1 in a different community and edge weight 3
+            Output: {community_of_1: 3}
+        """
         neighbor_comms: Dict[int, float] = {}
         for neighbor in graph.neighbors(node):
             comm = partition[neighbor]
@@ -28,6 +50,14 @@ class CommunityIdentification:
 
     @staticmethod
     def _one_level(graph: nx.Graph, partition: Dict[int, int], resolution: float) -> Tuple[Dict[int, int], bool]:
+        """
+        Perform one level of the Louvain local optimization.
+        Iteratively moves nodes to neighboring communities to maximize modularity.
+
+        Example:
+            Input: a triangle graph with initial partition {0:0, 1:1, 2:2}
+            Output: (updated partition dict, True) if any improvement was made.
+        """
         m = sum(data.get('weight', 1.0)
                 for _, _, data in graph.edges(data=True)) / 2.0
         if m == 0:
@@ -69,6 +99,14 @@ class CommunityIdentification:
 
     @staticmethod
     def _aggregate_graph(graph: nx.Graph, partition: Dict[int, int]) -> Tuple[nx.Graph, Dict[int, int]]:
+        """
+        Aggregate the graph based on current partition.
+        Each community is merged into a single node, and edge weights between communities are summed.
+
+        Example:
+            Input: graph with edge between nodes in the same community.
+            Output: new_graph with one node representing that community.
+        """
         new_graph = nx.Graph()
         for u, v, data in graph.edges(data=True):
             comm_u = partition[u]
@@ -85,6 +123,14 @@ class CommunityIdentification:
 
     @staticmethod
     def louvain(graph: nx.Graph, resolution: float = 1.0) -> List[int]:
+        """
+        Perform the Louvain algorithm on the graph and return a list where the i-th element is the community
+        label for node i.
+
+        Example:
+            Input: graph with 5 nodes, some edges.
+            Output: [0, 0, 1, 1, 0] where each index corresponds to a node.
+        """
         node_groups: Dict[int, List[int]] = {
             node: [node] for node in graph.nodes()}
         current_graph = graph.copy()
@@ -108,9 +154,8 @@ class CommunityIdentification:
             current_graph = new_graph
             current_partition = CommunityIdentification._init_partition(
                 current_graph)
-        comm_label: Dict[int, int] = {}
-        for label, comm in enumerate(sorted(node_groups.keys())):
-            comm_label[comm] = label
+        comm_label: Dict[int, int] = {
+            comm: label for label, comm in enumerate(sorted(node_groups.keys()))}
         n = graph.number_of_nodes()
         result: List[int] = [0] * n
         for comm, nodes in node_groups.items():
@@ -119,10 +164,15 @@ class CommunityIdentification:
         return result
 
 
-def compare_partitions(
-        true_labels: List[int], 
-        detected_labels: List[int]
-    ) -> float:
+def compare_partitions(true_labels: List[int], detected_labels: List[int]) -> float:
+    """
+    Compare two partitions and return the error rate (fraction of nodes misclassified).
+    Uses the Hungarian algorithm for optimal matching between community labels.
+
+    Example:
+        Input: true_labels = [0, 0, 1, 1], detected_labels = [1, 1, 0, 0]
+        Output: 0.0 (all nodes correctly classified after label matching)
+    """
     unique_true = sorted(set(true_labels))
     unique_detected = sorted(set(detected_labels))
     cost_matrix = np.zeros((len(unique_true), len(unique_detected)), dtype=int)
@@ -134,10 +184,14 @@ def compare_partitions(
     return error_rate
 
 
-def partition_list_to_labels(
-        partition_list: List[List[int]], 
-        n: int
-    ) -> List[int]:
+def partition_list_to_labels(partition_list: List[List[int]], n: int) -> List[int]:
+    """
+    Convert a partition list (list of communities, each a list of node indices) into a label list.
+
+    Example:
+        Input: partition_list = [[0, 1, 2], [3, 4]], n = 5
+        Output: [0, 0, 0, 1, 1]
+    """
     labels = [0] * n
     for label, community in enumerate(partition_list):
         for node in community:
@@ -145,20 +199,39 @@ def partition_list_to_labels(
     return labels
 
 
-def compute_layout_from_true_partition(
-        graph: nx.Graph, 
-        partition_list: List[List[int]]) -> Dict[int, Tuple[float, float]]:
-    pos = {}
-    offset = 2.0
+def compute_layout_from_true_partition(graph: nx.Graph, partition_list: List[List[int]]) -> Dict[int, Tuple[float, float]]:
+    """
+    Compute a layout for the graph where each community is assigned a position on a large circle.
+    Within each community, nodes are positioned randomly on a small subcircle around the community center.
+
+    Example:
+        Input: partition_list = [[0, 1, 2], [3, 4]]
+        Output: {0: (x0, y0), 1: (x1, y1), ..., 4: (x4, y4)} where positions reflect community structure.
+    """
+    pos: Dict[int, Tuple[float, float]] = {}
+    num_groups = len(partition_list)
+    big_radius = 10.0
+    small_radius = 6.0
     for i, community in enumerate(partition_list):
-        subgraph = graph.subgraph(community)
-        sub_pos = nx.spring_layout(subgraph, seed=42)
-        for node, (x, y) in sub_pos.items():
-            pos[node] = (x + i * offset, y + i * offset)
+        angle = 2 * math.pi * i / num_groups
+        center_x = big_radius * math.cos(angle)
+        center_y = big_radius * math.sin(angle)
+        for node in community:
+            theta = random.uniform(0, 2 * math.pi)
+            r = random.uniform(0, small_radius)
+            pos[node] = (center_x + r * math.cos(theta),
+                         center_y + r * math.sin(theta))
     return pos
 
 
 def display_partition(graph: nx.Graph, name: str, partition_list=None, partition_nodes=None, pos=None) -> None:
+    """
+    Display the graph using a given partition.
+
+    Example:
+        Input: a graph and partition_list = [[0,1,2],[3,4]]
+        Behavior: displays the graph colored by communities.
+    """
     if partition_list is not None:
         partition_nodes = NodePartition.partition_list_to_partition_nodes(
             partition_list)
@@ -168,10 +241,17 @@ def display_partition(graph: nx.Graph, name: str, partition_list=None, partition
 
 
 def demo() -> None:
+    """
+    Run a demo with three synthetic graphs and display the true vs detected partitions.
+    Also computes and prints the error rate of the detected partition compared to the true partition.
+
+    Example:
+        Behavior: generates graphs with "Strong", "Moderate", and "Weak" communities and plots their layouts.
+    """
     params = [
-        ("Strong Communities", 40, 0.8, 0.1),
-        ("Moderate Communities", 40, 0.6, 0.4),
-        ("Weak Communities", 40, 0.4, 0.3)
+        ("Strong Communities", 50, 0.8, 0.1),
+        ("Moderate Communities", 50, 0.7, 0.2),
+        ("Weak Communities", 50, 0.5, 0.3)
     ]
     rows = len(params)
     plt.figure(figsize=(12, 3 * rows))
@@ -182,19 +262,15 @@ def demo() -> None:
             true_partition, p, q)
         detected_part = CommunityIdentification.louvain(graph, resolution=1.0)
 
-        #########################################
-
         true_labels = partition_list_to_labels(true_partition, n_nodes)
         error_rate = compare_partitions(true_labels, detected_part)
         pos = compute_layout_from_true_partition(graph, true_partition)
 
-        #########################################
-
         print(f"{name} error rate: {error_rate:.2f}")
+
         plt.subplot(rows, 2, 2 * idx - 1)
         display_partition(graph, partition_list=true_partition,
-                          name=f"{name} - True Partition",
-                          pos=pos)
+                          name=f"{name} - True Partition ({p}/{q})", pos=pos)
         plt.subplot(rows, 2, 2 * idx)
         display_partition(graph, partition_nodes=detected_part,
                           name=f"{name} - Louvain Partition, error={error_rate:.2f}",
