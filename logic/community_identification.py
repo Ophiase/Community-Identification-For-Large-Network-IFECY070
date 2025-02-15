@@ -12,13 +12,6 @@ from logic.node_partition import NodePartition
 class CommunityIdentification:
     @staticmethod
     def _init_partition(graph: nx.Graph) -> Dict[int, int]:
-        """
-        Initialize a partition with each node in its own community.
-
-        Example:
-            Input: graph with nodes [0, 1, 2]
-            Output: {0: 0, 1: 1, 2: 2}
-        """
         return {node: node for node in graph.nodes()}
 
     @staticmethod
@@ -163,6 +156,32 @@ class CommunityIdentification:
                 result[node] = comm_label[comm]
         return result
 
+    @staticmethod
+    def project_partition(
+        target_groups: int,
+        detected_partition: List[int]
+    ) -> List[int]:
+        """
+        Project the detected partition to a specified number of groups by merging groups.
+        The merging is done by sorting the unique detected groups and mapping them proportionally 
+        to new labels ranging from 0 to target_groups - 1.
+
+        Example:
+            Input: target_groups = 3, detected_partition = [0, 1, 2, 3, 4]
+            Suppose unique groups sorted are [0, 1, 2, 3, 4] (total 5 groups). Then:
+              mapping: 0 -> int(0*3/5)=0,
+                       1 -> int(1*3/5)=0,
+                       2 -> int(2*3/5)=1,
+                       3 -> int(3*3/5)=1,
+                       4 -> int(4*3/5)=2.
+            Output: [0, 0, 1, 1, 2]
+        """
+        unique = sorted(set(detected_partition))
+        k = len(unique)
+        mapping = {group: int(index * target_groups / k)
+                   for index, group in enumerate(unique)}
+        return [mapping[label] for label in detected_partition]
+
 
 def compare_partitions(true_labels: List[int], detected_labels: List[int]) -> float:
     """
@@ -253,6 +272,8 @@ def demo() -> None:
         ("Moderate Communities", 50, 0.7, 0.2),
         ("Weak Communities", 50, 0.5, 0.3)
     ]
+    n_partitions = 4
+
     rows = len(params)
     plt.figure(figsize=(12, 3 * rows))
     for idx, (name, n_nodes, p, q) in enumerate(params, 1):
@@ -261,6 +282,8 @@ def demo() -> None:
         graph = GraphGeneration.generate_erdos_p_partition_model(
             true_partition, p, q)
         detected_part = CommunityIdentification.louvain(graph, resolution=1.0)
+        detected_part = CommunityIdentification.project_partition(
+            n_partitions, detected_part)
 
         true_labels = partition_list_to_labels(true_partition, n_nodes)
         error_rate = compare_partitions(true_labels, detected_part)
