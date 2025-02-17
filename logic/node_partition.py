@@ -96,7 +96,6 @@ class NodePartition:
 
         return result
 
-    # @numba.jit(nopython=True)
     @staticmethod
     def partition_list_to_partition_nodes(
         partition: PartitionGroupList,

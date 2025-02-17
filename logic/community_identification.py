@@ -1,11 +1,9 @@
 from typing import Dict, Tuple, List
 import random
-import math
 import networkx as nx
-import numpy as np
-from scipy.optimize import linear_sum_assignment
 from matplotlib import pyplot as plt
 from logic.graph_generation import GraphGeneration
+from logic.metrics import Metrics
 from logic.node_partition import NodePartition
 from visualization.partition_visualization import PartitionVisualization
 
@@ -183,68 +181,7 @@ class CommunityIdentification:
                    for index, group in enumerate(unique)}
         return [mapping[label] for label in detected_partition]
 
-
-def compare_partitions(true_labels: List[int], detected_labels: List[int]) -> float:
-    """
-    Compare two partitions and return the error rate (fraction of nodes misclassified).
-    Uses the Hungarian algorithm for optimal matching between community labels.
-
-    Example:
-        Input: true_labels = [0, 0, 1, 1], detected_labels = [1, 1, 0, 0]
-        Output: 0.0 (all nodes correctly classified after label matching)
-    """
-    unique_true = sorted(set(true_labels))
-    unique_detected = sorted(set(detected_labels))
-    cost_matrix = np.zeros((len(unique_true), len(unique_detected)), dtype=int)
-    for i in range(len(true_labels)):
-        cost_matrix[true_labels[i]][detected_labels[i]] += 1
-    row_ind, col_ind = linear_sum_assignment(-cost_matrix)
-    correct = cost_matrix[row_ind, col_ind].sum()
-    error_rate = 1 - correct / len(true_labels)
-    return error_rate
-
-
-
-
-def compute_layout_from_true_partition(graph: nx.Graph, partition_list: List[List[int]]) -> Dict[int, Tuple[float, float]]:
-    """
-    Compute a layout for the graph where each community is assigned a position on a large circle.
-    Within each community, nodes are positioned randomly on a small subcircle around the community center.
-
-    Example:
-        Input: partition_list = [[0, 1, 2], [3, 4]]
-        Output: {0: (x0, y0), 1: (x1, y1), ..., 4: (x4, y4)} where positions reflect community structure.
-    """
-    pos: Dict[int, Tuple[float, float]] = {}
-    num_groups = len(partition_list)
-    big_radius = 10.0
-    small_radius = 6.0
-    for i, community in enumerate(partition_list):
-        angle = 2 * math.pi * i / num_groups
-        center_x = big_radius * math.cos(angle)
-        center_y = big_radius * math.sin(angle)
-        for node in community:
-            theta = random.uniform(0, 2 * math.pi)
-            r = random.uniform(0, small_radius)
-            pos[node] = (center_x + r * math.cos(theta),
-                         center_y + r * math.sin(theta))
-    return pos
-
-
-def display_partition(graph: nx.Graph, name: str, partition_list=None, partition_nodes=None, pos=None) -> None:
-    """
-    Display the graph using a given partition.
-
-    Example:
-        Input: a graph and partition_list = [[0,1,2],[3,4]]
-        Behavior: displays the graph colored by communities.
-    """
-    if partition_list is not None:
-        partition_nodes = NodePartition.partition_list_to_partition_nodes(
-            partition_list)
-    nx.draw(graph, pos=pos, node_color=partition_nodes,
-            with_labels=True, cmap=plt.cm.rainbow)
-    plt.title(name)
+###################################################################################
 
 
 def demo() -> None:
@@ -275,7 +212,7 @@ def demo() -> None:
 
         true_labels = NodePartition.partition_list_to_partition_nodes(
             true_partition, n_nodes)
-        error_rate = compare_partitions(true_labels, detected_part)
+        error_rate = Metrics.compare_partitions(true_labels, detected_part)
         pos = PartitionVisualization.compute_layout_from_true_partition(
             graph, true_partition)
 
