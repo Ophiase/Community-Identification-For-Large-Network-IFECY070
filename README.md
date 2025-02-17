@@ -12,6 +12,7 @@ TODO
 # demonstrations
 make demo_distribution
 make demo_generation
+make demo_community_identification
 
 # unit tests
 make tests

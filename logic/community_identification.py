@@ -7,6 +7,7 @@ from scipy.optimize import linear_sum_assignment
 from matplotlib import pyplot as plt
 from logic.graph_generation import GraphGeneration
 from logic.node_partition import NodePartition
+from visualization.partition_visualization import PartitionVisualization
 
 
 class CommunityIdentification:
@@ -203,19 +204,6 @@ def compare_partitions(true_labels: List[int], detected_labels: List[int]) -> fl
     return error_rate
 
 
-def partition_list_to_labels(partition_list: List[List[int]], n: int) -> List[int]:
-    """
-    Convert a partition list (list of communities, each a list of node indices) into a label list.
-
-    Example:
-        Input: partition_list = [[0, 1, 2], [3, 4]], n = 5
-        Output: [0, 0, 0, 1, 1]
-    """
-    labels = [0] * n
-    for label, community in enumerate(partition_list):
-        for node in community:
-            labels[node] = label
-    return labels
 
 
 def compute_layout_from_true_partition(graph: nx.Graph, partition_list: List[List[int]]) -> Dict[int, Tuple[float, float]]:
@@ -285,19 +273,21 @@ def demo() -> None:
         detected_part = CommunityIdentification.project_partition(
             n_partitions, detected_part)
 
-        true_labels = partition_list_to_labels(true_partition, n_nodes)
+        true_labels = NodePartition.partition_list_to_partition_nodes(
+            true_partition, n_nodes)
         error_rate = compare_partitions(true_labels, detected_part)
-        pos = compute_layout_from_true_partition(graph, true_partition)
+        pos = PartitionVisualization.compute_layout_from_true_partition(
+            graph, true_partition)
 
         print(f"{name} error rate: {error_rate:.2f}")
 
         plt.subplot(rows, 2, 2 * idx - 1)
-        display_partition(graph, partition_list=true_partition,
-                          name=f"{name} - True Partition ({p}/{q})", pos=pos)
+        PartitionVisualization.display_partition(graph, partition_list=true_partition,
+                                                 name=f"{name} - True Partition ({p}/{q})", pos=pos)
         plt.subplot(rows, 2, 2 * idx)
-        display_partition(graph, partition_nodes=detected_part,
-                          name=f"{name} - Louvain Partition, error={error_rate:.2f}",
-                          pos=pos)
+        PartitionVisualization.display_partition(graph, partition_nodes=detected_part,
+                                                 name=f"{name} - Louvain Partition, error={error_rate:.2f}",
+                                                 pos=pos)
     plt.tight_layout()
     plt.show()
 

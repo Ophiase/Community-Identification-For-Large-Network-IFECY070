@@ -2,6 +2,8 @@ import random
 from typing import List, Set
 from typing import Union
 
+import numba
+
 PartitionGroupList = List[List[int]]
 PartitionListSet = List[Set[int]]
 PartitionNodes = List[int]
@@ -94,10 +96,22 @@ class NodePartition:
 
         return result
 
+    # @numba.jit(nopython=True)
     @staticmethod
-    def partition_list_to_partition_nodes(partition: PartitionGroupList) -> PartitionNodes:
-        n_nodes = sum([len(group) for group in partition])
-        result = [0 for _ in range(n_nodes)]
+    def partition_list_to_partition_nodes(
+        partition: PartitionGroupList,
+        n_nodes: int = None
+    ) -> PartitionNodes:
+        """
+        Convert a partition list (list of communities, each a list of node indices) into a label list.
+
+        Example:
+            Input: partition_list = [[0, 1, 2], [3, 4]], n = 5
+            Output: [0, 0, 0, 1, 1]
+        """
+        if n_nodes is None:
+            n_nodes = sum([len(group) for group in partition])
+        result = [0] * n_nodes
 
         for which_group, group in enumerate(partition):
             for e in group:
