@@ -79,6 +79,7 @@ class GraphGeneration:
 
         return g
 
+    @staticmethod
     def generate_erdos_m_partition_model(
         partition: List[List[int]],
         m_edges: float, q: float
