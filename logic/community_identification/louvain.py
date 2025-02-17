@@ -6,12 +6,17 @@ import networkx as nx
 class Louvain:
     @staticmethod
     def _init_partition(graph: nx.Graph) -> Dict[int, int]:
+        """
+        Time Complexity: O(n)
+        """
         return {node: node for node in graph.nodes()}
 
     @staticmethod
     def _compute_degrees(graph: nx.Graph) -> Dict[int, float]:
         """
         Compute the weighted degree for each node.
+
+        Time Complexity: O(n)
 
         Example:
             Input: graph with edge (0,1) of weight 2
@@ -23,6 +28,9 @@ class Louvain:
     def _get_neighboring_communities(graph: nx.Graph, partition: Dict[int, int], node: int) -> Dict[int, float]:
         """
         Compute the total weight of edges from a given node to each neighboring community.
+
+        Time Complexity: O(d):
+        - d: degree of the node (number of neighbors).
 
         Example:
             Input: node 0 with neighbor 1 in a different community and edge weight 3
@@ -40,6 +48,11 @@ class Louvain:
         """
         Perform one level of the Louvain local optimization.
         Iteratively moves nodes to neighboring communities to maximize modularity.
+
+        Time Complexity: O(m * log(n))
+        - m: number of edges in the graph.
+        - n: number of nodes in the graph.
+        - The log(n) factor comes from the need to potentially move each node to a different community.
 
         Example:
             Input: a triangle graph with initial partition {0:0, 1:1, 2:2}
@@ -90,6 +103,9 @@ class Louvain:
         Aggregate the graph based on current partition.
         Each community is merged into a single node, and edge weights between communities are summed.
 
+        Time Complexity: O(m)
+        - m: number of edges in the graph.
+
         Example:
             Input: graph with edge between nodes in the same community.
             Output: new_graph with one node representing that community.
@@ -113,6 +129,11 @@ class Louvain:
         """
         Perform the Louvain algorithm on the graph and return a list where the i-th element is the community
         label for node i.
+
+        Time Complexity: O(m * log(n))
+        - m: number of edges in the graph.
+        - n: number of nodes in the graph.
+        - The log(n) factor comes from the iterative process of moving nodes and aggregating the graph.
 
         Example:
             Input: graph with 5 nodes, some edges.
