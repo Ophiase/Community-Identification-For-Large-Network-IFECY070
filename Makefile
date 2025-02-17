@@ -4,13 +4,13 @@ demo:
 #########################################
 
 demo_distribution:
-	python3 -m logic.degree_distribution test
+	python3 -m demo.distribution test
 
 demo_generation:
-	python3 -m logic.graph_generation
+	python3 -m demo.generation
 
-demo_community_identification:
-	python3 -m logic.community_identification
+demo_identification:
+	python3 -m demo.identification
 
 ###################################################################################
 

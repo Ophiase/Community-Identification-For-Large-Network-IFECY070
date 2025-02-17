@@ -1,14 +1,9 @@
-from typing import Dict, Tuple, List
 import random
+from typing import Dict, List, Tuple
 import networkx as nx
-from matplotlib import pyplot as plt
-from logic.graph_generation import GraphGeneration
-from logic.metrics import Metrics
-from logic.node_partition import NodePartition
-from visualization.partition_visualization import PartitionVisualization
 
 
-class CommunityIdentification:
+class Louvain:
     @staticmethod
     def _init_partition(graph: nx.Graph) -> Dict[int, int]:
         return {node: node for node in graph.nodes()}
@@ -54,7 +49,7 @@ class CommunityIdentification:
                 for _, _, data in graph.edges(data=True)) / 2.0
         if m == 0:
             return partition, False
-        degrees = CommunityIdentification._compute_degrees(graph)
+        degrees = Louvain._compute_degrees(graph)
         community_total: Dict[int, float] = {}
         for node, comm in partition.items():
             community_total[comm] = community_total.get(
@@ -68,7 +63,7 @@ class CommunityIdentification:
             for node in nodes:
                 current_comm = partition[node]
                 k_i = degrees[node]
-                neighbor_comms = CommunityIdentification._get_neighboring_communities(
+                neighbor_comms = Louvain._get_neighboring_communities(
                     graph, partition, node)
                 community_total[current_comm] -= k_i
                 best_comm = current_comm
@@ -126,14 +121,14 @@ class CommunityIdentification:
         node_groups: Dict[int, List[int]] = {
             node: [node] for node in graph.nodes()}
         current_graph = graph.copy()
-        current_partition = CommunityIdentification._init_partition(
+        current_partition = Louvain._init_partition(
             current_graph)
         while True:
-            current_partition, improved = CommunityIdentification._one_level(
+            current_partition, improved = Louvain._one_level(
                 current_graph, current_partition, resolution)
             if not improved:
                 break
-            new_graph, mapping = CommunityIdentification._aggregate_graph(
+            new_graph, mapping = Louvain._aggregate_graph(
                 current_graph, current_partition)
             new_node_groups: Dict[int, List[int]] = {}
             for node in current_graph.nodes():
@@ -144,7 +139,7 @@ class CommunityIdentification:
                 new_node_groups[new_comm].extend(node_groups[node])
             node_groups = new_node_groups
             current_graph = new_graph
-            current_partition = CommunityIdentification._init_partition(
+            current_partition = Louvain._init_partition(
                 current_graph)
         comm_label: Dict[int, int] = {
             comm: label for label, comm in enumerate(sorted(node_groups.keys()))}
@@ -154,80 +149,3 @@ class CommunityIdentification:
             for node in nodes:
                 result[node] = comm_label[comm]
         return result
-
-    @staticmethod
-    def project_partition(
-        target_groups: int,
-        detected_partition: List[int]
-    ) -> List[int]:
-        """
-        Project the detected partition to a specified number of groups by merging groups.
-        The merging is done by sorting the unique detected groups and mapping them proportionally 
-        to new labels ranging from 0 to target_groups - 1.
-
-        Example:
-            Input: target_groups = 3, detected_partition = [0, 1, 2, 3, 4]
-            Suppose unique groups sorted are [0, 1, 2, 3, 4] (total 5 groups). Then:
-              mapping: 0 -> int(0*3/5)=0,
-                       1 -> int(1*3/5)=0,
-                       2 -> int(2*3/5)=1,
-                       3 -> int(3*3/5)=1,
-                       4 -> int(4*3/5)=2.
-            Output: [0, 0, 1, 1, 2]
-        """
-        unique = sorted(set(detected_partition))
-        k = len(unique)
-        mapping = {group: int(index * target_groups / k)
-                   for index, group in enumerate(unique)}
-        return [mapping[label] for label in detected_partition]
-
-###################################################################################
-
-
-def demo() -> None:
-    """
-    Run a demo with three synthetic graphs and display the true vs detected partitions.
-    Also computes and prints the error rate of the detected partition compared to the true partition.
-
-    Example:
-        Behavior: generates graphs with "Strong", "Moderate", and "Weak" communities and plots their layouts.
-    """
-    params = [
-        ("Strong Communities", 50, 0.8, 0.1),
-        ("Moderate Communities", 50, 0.7, 0.2),
-        ("Weak Communities", 50, 0.5, 0.3)
-    ]
-    n_partitions = 4
-
-    rows = len(params)
-    plt.figure(figsize=(12, 3 * rows))
-    for idx, (name, n_nodes, p, q) in enumerate(params, 1):
-        true_partition = NodePartition.partition_list(
-            n_nodes, n_partitions=4, as_set=False)
-        graph = GraphGeneration.generate_erdos_p_partition_model(
-            true_partition, p, q)
-        detected_part = CommunityIdentification.louvain(graph, resolution=1.0)
-        detected_part = CommunityIdentification.project_partition(
-            n_partitions, detected_part)
-
-        true_labels = NodePartition.partition_list_to_partition_nodes(
-            true_partition, n_nodes)
-        error_rate = Metrics.compare_partitions(true_labels, detected_part)
-        pos = PartitionVisualization.compute_layout_from_true_partition(
-            graph, true_partition)
-
-        print(f"{name} error rate: {error_rate:.2f}")
-
-        plt.subplot(rows, 2, 2 * idx - 1)
-        PartitionVisualization.display_partition(graph, partition_list=true_partition,
-                                                 name=f"{name} - True Partition ({p}/{q})", pos=pos)
-        plt.subplot(rows, 2, 2 * idx)
-        PartitionVisualization.display_partition(graph, partition_nodes=detected_part,
-                                                 name=f"{name} - Louvain Partition, error={error_rate:.2f}",
-                                                 pos=pos)
-    plt.tight_layout()
-    plt.show()
-
-
-if __name__ == "__main__":
-    demo()
