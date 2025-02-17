@@ -34,8 +34,12 @@ make tests_verbose
             - Eventually shuffle the nodes 
 - Exercise 2 :
     - List explicitely 2 algorithms
-        - ✅ Louvain
+        - ✅ Louvain: O(n log n)
         - Other?
+            - Girvan-Newman: $O(n^3)$
+            - Label Propagation Algorithm (*LPA*): $O(m)$
+            - Infomap: $O(n \log n)$ for the best implementation
+            - Fast Greedy: $O(n² \log n)$
     - Compare them
         - Execution time and space
         - Use different scales

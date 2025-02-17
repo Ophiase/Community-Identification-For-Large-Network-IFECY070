@@ -125,7 +125,7 @@ class Louvain:
         return new_graph, mapping
 
     @staticmethod
-    def louvain(graph: nx.Graph, resolution: float = 1.0) -> List[int]:
+    def identification(graph: nx.Graph, resolution: float = 1.0) -> List[int]:
         """
         Perform the Louvain algorithm on the graph and return a list where the i-th element is the community
         label for node i.

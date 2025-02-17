@@ -1,4 +1,3 @@
-
 from matplotlib import pyplot as plt
 from logic.community_identification import CommunityIdentification
 from logic.community_identification.louvain import Louvain
@@ -30,7 +29,7 @@ def demo() -> None:
             n_nodes, n_partitions=4, as_set=False)
         graph = GraphGeneration.generate_erdos_p_partition_model(
             true_partition, p, q)
-        detected_part = Louvain.louvain(graph, resolution=1.0)
+        detected_part = Louvain.identification(graph, resolution=1.0)
         detected_part = CommunityIdentification.project_partition(
             n_partitions, detected_part)
 
