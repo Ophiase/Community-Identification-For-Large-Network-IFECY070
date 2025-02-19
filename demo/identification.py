@@ -36,12 +36,14 @@ def demo() -> None:
                 LabelPropagation.identification(graph)
             )
          ),
-        # ("Girvan Newman", lambda graph, n_partitions:
-        #     CommunityIdentification.project_partition(
-        #         n_partitions,
-        #         GirvanNewman.identification(graph)
-        #     )
-        #  )
+        ("Girvan Newman", lambda graph, n_partitions:
+            CommunityIdentification.project_partition(
+                n_partitions,
+                NodePartition.partition_list_to_partition_nodes(
+                    GirvanNewman.identification(graph)
+                )
+            )
+         )
         # ("InfoMap", lambda graph:None),
         # ("Fast Greedy", lambda graph:None),
     ]
@@ -68,13 +70,14 @@ def demo() -> None:
         print(f"{param_name}")
         for algorithm_idx, (algorithm_name, algorithm) in enumerate(algorithms):
             computed_partition = algorithm(graph, n_partitions)
+            print(computed_partition)
             error_rate = Metrics.compare_partitions(
                 true_labels, computed_partition)
 
             print(f"\t{algorithm_name} Partition, Error={error_rate:.2f}")
             plt.subplot(rows, columns, columns * param_idx + algorithm_idx + 2)
             PartitionVisualization.display_partition(graph, partition_nodes=computed_partition,
-                                                     name=f"{algorithm_name} | {param_name}, error={error_rate:.2f}",
+                                                     name=f"{algorithm_name} | error={error_rate:.2f}",
                                                      pos=pos)
 
     plt.tight_layout()
