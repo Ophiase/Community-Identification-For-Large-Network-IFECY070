@@ -70,7 +70,6 @@ def demo() -> None:
         print(f"{param_name}")
         for algorithm_idx, (algorithm_name, algorithm) in enumerate(algorithms):
             computed_partition = algorithm(graph, n_partitions)
-            print(computed_partition)
             error_rate = Metrics.compare_partitions(
                 true_labels, computed_partition)
 
