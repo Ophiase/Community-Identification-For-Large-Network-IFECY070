@@ -20,34 +20,51 @@ def demo() -> None:
         ("Moderate Communities", 50, 0.7, 0.2),
         ("Weak Communities", 50, 0.5, 0.3)
     ]
+
+    algorithms = [
+        ("Louvain", lambda graph, n_partitions:
+            CommunityIdentification.project_partition(
+                n_partitions,
+                Louvain.identification(graph, resolution=1.0)
+            )
+         ),
+        # ("Girvan Newman", lambda graph:None),
+        # ("Label Propagation", lambda graph:None),
+        # ("InfoMap", lambda graph:None),
+        # ("Fast Greedy", lambda graph:None),
+    ]
+
     n_partitions = 4
 
     rows = len(params)
-    plt.figure(figsize=(12, 3 * rows))
-    for idx, (name, n_nodes, p, q) in enumerate(params, 1):
+    columns = len(algorithms) + 1
+    plt.figure(figsize=(4 * columns, 3 * rows))
+    for param_idx, (param_name, n_nodes, p, q) in enumerate(params, 0):
         true_partition = NodePartition.partition_list(
             n_nodes, n_partitions=4, as_set=False)
         graph = GraphGeneration.generate_erdos_p_partition_model(
             true_partition, p, q)
-        detected_part = Louvain.identification(graph, resolution=1.0)
-        detected_part = CommunityIdentification.project_partition(
-            n_partitions, detected_part)
 
         true_labels = NodePartition.partition_list_to_partition_nodes(
             true_partition, n_nodes)
-        error_rate = Metrics.compare_partitions(true_labels, detected_part)
         pos = PartitionVisualization.compute_layout_from_true_partition(
             graph, true_partition)
 
-        print(f"{name} error rate: {error_rate:.2f}")
-
-        plt.subplot(rows, 2, 2 * idx - 1)
+        plt.subplot(rows, columns, 1 + columns * param_idx)
         PartitionVisualization.display_partition(graph, partition_list=true_partition,
-                                                 name=f"{name} - True Partition ({p}/{q})", pos=pos)
-        plt.subplot(rows, 2, 2 * idx)
-        PartitionVisualization.display_partition(graph, partition_nodes=detected_part,
-                                                 name=f"{name} - Louvain Partition, error={error_rate:.2f}",
-                                                 pos=pos)
+                                                 name=f"{param_name} - True Partition ({p}/{q})", pos=pos)
+
+        for algorithm_idx, (algorithm_name, algorithm) in enumerate(algorithms):
+            computed_partition = algorithm(graph, n_partitions)
+            error_rate = Metrics.compare_partitions(
+                true_labels, computed_partition)
+
+            print(columns * param_idx + algorithm_idx + 1)
+            plt.subplot(rows, columns, columns * param_idx + algorithm_idx + 2)
+            PartitionVisualization.display_partition(graph, partition_nodes=computed_partition,
+                                                     name=f"{algorithm_name} | {param_name} Partition, error={error_rate:.2f}",
+                                                     pos=pos)
+
     plt.tight_layout()
     plt.show()
 
