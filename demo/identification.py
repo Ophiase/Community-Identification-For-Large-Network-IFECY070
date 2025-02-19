@@ -53,16 +53,16 @@ def demo() -> None:
         plt.subplot(rows, columns, 1 + columns * param_idx)
         PartitionVisualization.display_partition(graph, partition_list=true_partition,
                                                  name=f"{param_name} - True Partition ({p}/{q})", pos=pos)
-
+        print(f"{param_name}")
         for algorithm_idx, (algorithm_name, algorithm) in enumerate(algorithms):
             computed_partition = algorithm(graph, n_partitions)
             error_rate = Metrics.compare_partitions(
                 true_labels, computed_partition)
 
-            print(columns * param_idx + algorithm_idx + 1)
+            print(f"\t{algorithm_name} Partition, Error={error_rate:.2f}")
             plt.subplot(rows, columns, columns * param_idx + algorithm_idx + 2)
             PartitionVisualization.display_partition(graph, partition_nodes=computed_partition,
-                                                     name=f"{algorithm_name} | {param_name} Partition, error={error_rate:.2f}",
+                                                     name=f"{algorithm_name} | {param_name}, error={error_rate:.2f}",
                                                      pos=pos)
 
     plt.tight_layout()

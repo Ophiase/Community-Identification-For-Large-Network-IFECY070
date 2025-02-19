@@ -13,7 +13,7 @@ demo_identification:
 	python3 -m demo.identification
 
 benchmark:
-	python3 -m benchmark
+	python3 -m demo.benchmark
 
 ###################################################################################
 

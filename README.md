@@ -13,6 +13,7 @@ TODO
 make demo_distribution
 make demo_generation
 make demo_community_identification
+mke benchmark
 
 # unit tests
 make tests
