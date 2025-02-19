@@ -23,6 +23,9 @@ tests:
 tests_verbose:
 	python3 -m pytest tests/ -v
 
+clean:
+	find . -type d -name "__pycache__" -exec rm -r {} +
+
 ###################################################################################
 
 .PHONY: demo tests tests_verbose
