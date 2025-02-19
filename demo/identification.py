@@ -1,5 +1,7 @@
 from matplotlib import pyplot as plt
 from logic.community_identification import CommunityIdentification
+from logic.community_identification.girvan_newman import GirvanNewman
+from logic.community_identification.label_propagation import LabelPropagation
 from logic.community_identification.louvain import Louvain
 from logic.graph_generation import GraphGeneration
 from logic.metrics import Metrics
@@ -25,11 +27,21 @@ def demo() -> None:
         ("Louvain", lambda graph, n_partitions:
             CommunityIdentification.project_partition(
                 n_partitions,
-                Louvain.identification(graph, resolution=1.0)
+                Louvain.identification(graph)
             )
          ),
-        # ("Girvan Newman", lambda graph:None),
-        # ("Label Propagation", lambda graph:None),
+        ("Label Propagation", lambda graph, n_partitions:
+            CommunityIdentification.project_partition(
+                n_partitions,
+                LabelPropagation.identification(graph)
+            )
+         ),
+        # ("Girvan Newman", lambda graph, n_partitions:
+        #     CommunityIdentification.project_partition(
+        #         n_partitions,
+        #         GirvanNewman.identification(graph)
+        #     )
+        #  )
         # ("InfoMap", lambda graph:None),
         # ("Fast Greedy", lambda graph:None),
     ]
