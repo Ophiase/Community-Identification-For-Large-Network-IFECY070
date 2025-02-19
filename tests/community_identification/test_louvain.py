@@ -1,19 +1,19 @@
 import random
 import networkx as nx
 import unittest
-from logic.community_identification import CommunityIdentification
+from logic.community_identification.louvain import Louvain
 
 
 class TestCommunityIdentification(unittest.TestCase):
     def test_init_partition(self):
         graph = nx.path_graph(3)
-        partition = CommunityIdentification._init_partition(graph)
+        partition = Louvain._init_partition(graph)
         self.assertEqual(partition, {0: 0, 1: 1, 2: 2})
 
     def test_compute_degrees(self):
         graph = nx.Graph()
         graph.add_edge(0, 1)
-        degrees = CommunityIdentification._compute_degrees(graph)
+        degrees = Louvain._compute_degrees(graph)
         self.assertEqual(degrees[0], 1)
         self.assertEqual(degrees[1], 1)
 
@@ -21,7 +21,7 @@ class TestCommunityIdentification(unittest.TestCase):
         graph = nx.Graph()
         graph.add_edge(0, 1, weight=2)
         partition = {0: 0, 1: 1}
-        neighbor_comms = CommunityIdentification._get_neighboring_communities(
+        neighbor_comms = Louvain._get_neighboring_communities(
             graph, partition, 0)
         self.assertEqual(neighbor_comms, {1: 2})
 
@@ -29,8 +29,8 @@ class TestCommunityIdentification(unittest.TestCase):
         random.seed(42)
         graph = nx.Graph()
         graph.add_edges_from([(0, 1), (1, 2), (2, 0)])
-        partition = CommunityIdentification._init_partition(graph)
-        new_partition, improved = CommunityIdentification._one_level(
+        partition = Louvain._init_partition(graph)
+        new_partition, improved = Louvain._one_level(
             graph, partition, resolution=1.0)
         self.assertIsInstance(new_partition, dict)
         self.assertIsInstance(improved, bool)
@@ -39,7 +39,7 @@ class TestCommunityIdentification(unittest.TestCase):
         graph = nx.Graph()
         graph.add_edge(0, 1, weight=2)
         partition = {0: 0, 1: 0}
-        new_graph, mapping = CommunityIdentification._aggregate_graph(
+        new_graph, mapping = Louvain._aggregate_graph(
             graph, partition)
         self.assertEqual(new_graph.number_of_nodes(), 1)
         edge_data = list(new_graph.edges(data=True))[0][2]
@@ -48,7 +48,7 @@ class TestCommunityIdentification(unittest.TestCase):
     def test_louvain_output(self):
         graph = nx.Graph()
         graph.add_edges_from([(0, 1), (1, 2), (2, 0), (2, 3)])
-        result = CommunityIdentification.louvain(graph, resolution=1.0)
+        result = Louvain.identification(graph, resolution=1.0)
         self.assertIsInstance(result, list)
         self.assertEqual(len(result), graph.number_of_nodes())
 
