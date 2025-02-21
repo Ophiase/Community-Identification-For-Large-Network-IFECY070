@@ -1,6 +1,7 @@
 import os
 import time
 import pandas as pd
+import matplotlib.pyplot as plt
 from multiprocessing import Process, Queue
 from typing import Any, Callable, Optional, Tuple, List
 from itertools import product
@@ -15,14 +16,20 @@ from logic.node_partition import NodePartition
 from visualization.partition_visualization import PartitionVisualization
 
 BENCHMARK_OUTPUT: str = os.path.join("output", "benchmark.csv")
-TIMEOUT: float = 1.0
+TIMEOUT: float = 2.0
+N_NODES = [
+    50,
+    int(1e2),
+    # int(1e3),
+    # int(1e4)
+]
 
 
 def execute_with_timeout(
-        func: Callable[..., Any],
-        timeout: float,
-        *args: Any,
-        **kwargs: Any
+    func: Callable[..., Any],
+    timeout: float,
+    *args: Any,
+    **kwargs: Any
 ) -> Tuple[Optional[Any], Optional[float]]:
     queue: Queue = Queue()
 
@@ -32,7 +39,7 @@ def execute_with_timeout(
         q.put((result, time.time() - start))
 
     process: Process = Process(
-        target=worker, args=(queue,)+args, kwargs=kwargs)
+        target=worker, args=(queue,) + args, kwargs=kwargs)
     process.start()
     process.join(timeout)
     if process.is_alive():
@@ -43,12 +50,10 @@ def execute_with_timeout(
 
 
 def process_parameters(
-        params: List[Tuple[str, int, float, float]],
-        algorithms: List[Tuple[str, Callable[[Any, int], Any]]]
+    params: List[Tuple[str, int, float, float]],
+    algorithms: List[Tuple[str, Callable[[Any, int], Any]]]
 ) -> List[dict]:
-
     benchmark_data: List[dict] = []
-
     for param_name, n_nodes, p, q in params:
         print(f"{param_name}\t| {n_nodes} Nodes")
         start_time: float = time.time()
@@ -63,9 +68,8 @@ def process_parameters(
         print(f"\tPartition Generation Time\t= {elapsed_partition:.4f}")
         print(f"\tGraph Generation Time\t\t= {elapsed_graph:.4f}")
         for algorithm_name, algorithm in algorithms:
-            # type: ignore
             result, elapsed = execute_with_timeout(
-                algorithm, TIMEOUT, graph, 4)  # type: ignore
+                algorithm, TIMEOUT, graph, 4)
             if result is None:
                 print(f"\tAlgorithm [{algorithm_name}] timed out")
             else:
@@ -86,25 +90,43 @@ def process_parameters(
     return benchmark_data
 
 
-def save_benchmark(
-        benchmark_data: List[dict],
-        output_path: str = BENCHMARK_OUTPUT
-) -> None:
+def save_benchmark(benchmark_data: List[dict], output_path: str = BENCHMARK_OUTPUT) -> None:
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     pd.DataFrame(benchmark_data).to_csv(output_path, index=False)
     print(f"Saving to {output_path} ..")
 
 
+def generate_benchmark_figure(benchmark_data: List[dict]) -> plt.Figure:
+    # TODO: Manage properly the time out
+
+    df: pd.DataFrame = pd.DataFrame(benchmark_data)
+    df['group'] = df['community_label'] + \
+        " (" + df['n_nodes'].astype(str) + ")"
+    error_df: pd.DataFrame = df.pivot(
+        index='group', columns='algorithm', values='error')
+    time_df: pd.DataFrame = df.pivot(
+        index='group', columns='algorithm', values='time')
+    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    error_df.plot(kind='bar', ax=axes[0], rot=45)
+    axes[0].set_title("Error Rates")
+    axes[0].set_ylabel("Error")
+    time_df.plot(kind='bar', ax=axes[1], rot=45)
+    axes[1].set_title("Execution Time (s)")
+    axes[1].set_ylabel("Time (s)")
+    fig.tight_layout()
+    return fig
+
+
 def main() -> None:
-    n_values: List[int] = [int(1e2), int(1e3)]
+    n_values: List[int] = N_NODES
     param_values: List[Tuple[str, float, float]] = [
         ("Strong Communities", 0.9, 0.1),
         ("Moderate Communities", 0.8, 0.2),
         ("Weak Communities", 0.7, 0.3)
     ]
-
     params: List[Tuple[str, int, float, float]] = [
-        (name, n, p, q) for (name, p, q), n in product(param_values, n_values)]
+        (name, n, p, q) for (name, p, q), n in product(param_values, n_values)
+    ]
     algorithms: List[Tuple[str, Callable[[Any, int], Any]]] = [
         ("Louvain", lambda graph, n_parts: CommunityIdentification.project_partition(
             n_parts, Louvain.identification(graph, resolution=1.0))),
@@ -113,9 +135,10 @@ def main() -> None:
         ("Girvan Newman", lambda graph, n_parts: CommunityIdentification.project_partition(
             n_parts, NodePartition.partition_list_to_partition_nodes(GirvanNewman.identification(graph))))
     ]
-
     benchmark_data: List[dict] = process_parameters(params, algorithms)
     save_benchmark(benchmark_data)
+    fig: plt.Figure = generate_benchmark_figure(benchmark_data)
+    plt.show()
 
 
 if __name__ == "__main__":
