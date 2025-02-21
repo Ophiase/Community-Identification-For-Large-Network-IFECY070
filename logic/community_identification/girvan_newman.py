@@ -56,7 +56,7 @@ class GirvanNewman:
         return Q / (2 * m)
 
     @staticmethod
-    def identification(graph: nx.Graph, max_iter: int = 100) -> List[Set[int]]:
+    def identification(graph: nx.Graph, max_iter: int = 500) -> List[Set[int]]:
         """
         Identify communities using the Girvan-Newman algorithm.
 
@@ -66,6 +66,13 @@ class GirvanNewman:
         working_graph = graph.copy()
         best_modularity = -1.0
         best_partition: List[Set[int]] = []
+
+        communities = GirvanNewman._get_components(working_graph)
+        modularity = GirvanNewman._calculate_modularity(
+            original_graph, communities)
+        if modularity > best_modularity:
+            best_modularity = modularity
+            best_partition = communities
 
         for _ in range(max_iter):
             edge = GirvanNewman._remove_highest_betweenness_edge(working_graph)

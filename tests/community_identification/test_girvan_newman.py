@@ -46,6 +46,47 @@ class TestGirvanNewman(unittest.TestCase):
         self.assertTrue(any({0, 1, 2}.issubset(comm) for comm in communities))
         self.assertTrue(any({3, 4, 5}.issubset(comm) for comm in communities))
 
+    def test_no_edges_compute_betweenness(self):
+        graph = nx.Graph()
+        betweenness = GirvanNewman._compute_betweenness(graph)
+        self.assertEqual(betweenness, {})
+
+    def test_multiple_highest_betweenness(self):
+        graph = nx.cycle_graph(4)  # All edges should have equal betweenness
+        initial_edges = set(graph.edges())
+        removed_edge = GirvanNewman._remove_highest_betweenness_edge(graph)
+        self.assertTrue(removed_edge in initial_edges or tuple(
+            reversed(removed_edge)) in initial_edges)
+        self.assertEqual(len(graph.edges()), len(initial_edges) - 1)
+
+    def test_modularity_empty_graph(self):
+        graph = nx.Graph()
+        communities = []
+        modularity = GirvanNewman._calculate_modularity(graph, communities)
+        self.assertEqual(modularity, 0.0)
+
+    def test_modularity_disconnected_graph(self):
+        graph = nx.Graph()
+        graph.add_edges_from([(0, 1), (2, 3)])
+        communities = [{0, 1}, {2, 3}]
+        modularity = GirvanNewman._calculate_modularity(graph, communities)
+        # Should be positive for well-separated communities
+        self.assertGreater(modularity, 0)
+
+    def test_identification_disconnected_graph(self):
+        graph = nx.Graph()
+        graph.add_edges_from([(0, 1), (2, 3)])
+        partition = GirvanNewman.identification(graph, max_iter=10)
+        self.assertEqual(len(partition), 2)
+        self.assertTrue({0, 1} in [set(c) for c in partition])
+        self.assertTrue({2, 3} in [set(c) for c in partition])
+
+    def test_identification_max_iter_reached(self):
+        graph = nx.path_graph(10)  # Long path graph
+        partition = GirvanNewman.identification(graph, max_iter=2)
+        # Should still return a valid partition
+        self.assertTrue(len(partition) > 1)
+
 
 if __name__ == '__main__':
     unittest.main()

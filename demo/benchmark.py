@@ -98,9 +98,9 @@ def save_benchmark(
 def main() -> None:
     n_values: List[int] = [int(1e2), int(1e3)]
     param_values: List[Tuple[str, float, float]] = [
-        ("Strong Communities", 0.8, 0.1),
-        ("Moderate Communities", 0.7, 0.2),
-        ("Weak Communities", 0.5, 0.3)
+        ("Strong Communities", 0.9, 0.1),
+        ("Moderate Communities", 0.8, 0.2),
+        ("Weak Communities", 0.7, 0.3)
     ]
 
     params: List[Tuple[str, int, float, float]] = [

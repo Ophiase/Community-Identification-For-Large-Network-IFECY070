@@ -18,9 +18,9 @@ def demo() -> None:
         Behavior: generates graphs with "Strong", "Moderate", and "Weak" communities and plots their layouts.
     """
     params = [
-        ("Strong Communities", 50, 0.8, 0.1),
-        ("Moderate Communities", 50, 0.7, 0.2),
-        ("Weak Communities", 50, 0.5, 0.3)
+        ("Strong Communities", 50, 0.9, 0.1),
+        ("Moderate Communities", 50, 0.8, 0.2),
+        ("Weak Communities", 50, 0.7, 0.3)
     ]
 
     algorithms = [
