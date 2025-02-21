@@ -84,37 +84,37 @@ class TestLabelPropagation(unittest.TestCase):
         # Node 0 has neighbors with labels 1 and 2 (equally frequent)
         self.assertTrue(new_labels[0] in [1, 2])
 
-    # def test_tie_breaking_consistency(self) -> None:
-    #     """
-    #     Test the consistency of tie-breaking over multiple runs.
-    #     """
-    #     graph = nx.Graph()
-    #     graph.add_edges_from([(0, 1), (0, 2)])
-    #     initial = {0: 0, 1: 1, 2: 2}
-    #     choices = []
-    #     for _ in range(100):
-    #         new_labels = LabelPropagation._propagate_labels(graph, initial)
-    #         choices.append(new_labels[0])
-    #     counter = collections.Counter(choices)
-    #     # Ensure both labels are chosen at least once due to randomness
-    #     self.assertTrue(1 in counter and 2 in counter)
+    def test_tie_breaking_consistency(self) -> None:
+        """
+        Test the consistency of tie-breaking over multiple runs.
+        """
+        graph = nx.Graph()
+        graph.add_edges_from([(0, 1), (0, 2)])
+        initial = {0: 0, 1: 1, 2: 2}
+        choices = []
+        for _ in range(100):
+            new_labels = LabelPropagation._propagate_labels(graph, initial)
+            choices.append(new_labels[0])
+        counter = collections.Counter(choices)
+        # Ensure both labels are chosen at least once due to randomness
+        self.assertTrue(1 in counter and 2 in counter)
 
-    # def test_weak_communities(self) -> None:
-    #     """
-    #     Test Label Propagation on a graph with weak community structure.
-    #     """
-    #     random.seed(42)
-    #     graph = nx.Graph()
-    #     # Community 1: nodes 0,1,2 with some internal edges
-    #     graph.add_edges_from([(0, 1), (1, 2)])
-    #     # Community 2: nodes 3,4,5 with some internal edges
-    #     graph.add_edges_from([(3, 4), (4, 5)])
-    #     # Many inter-community edges
-    #     graph.add_edges_from([(0, 3), (0, 4), (1, 3), (1, 5), (2, 4), (2, 5)])
+    def test_weak_communities(self) -> None:
+        """
+        Test Label Propagation on a graph with weak community structure.
+        """
+        random.seed(42)
+        graph = nx.Graph()
+        # Community 1: nodes 0,1,2 with some internal edges
+        graph.add_edges_from([(0, 1), (1, 2)])
+        # Community 2: nodes 3,4,5 with some internal edges
+        graph.add_edges_from([(3, 4), (4, 5)])
+        # Many inter-community edges
+        graph.add_edges_from([(0, 3), (0, 4), (1, 3), (1, 5), (2, 4), (2, 5)])
 
-    #     result = LabelPropagation.identification(graph)
-    #     # Check that the algorithm converges and assigns communities
-    #     self.assertTrue(len(set(result)) >= 1)
+        result = LabelPropagation.identification(graph)
+        # Check that the algorithm converges and assigns communities
+        self.assertTrue(len(set(result)) >= 1)
 
     def test_convergence_speed(self) -> None:
         """
