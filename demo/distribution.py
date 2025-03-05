@@ -10,14 +10,16 @@ def compute(graph: nx.Graph, num_destinations: int):
 
     print("Degree Distribution:")
     for degree, count in sorted(distribution.items()):
-        print(f"Degree {degree}: {count} nodes")
+        print(f"- Degree {degree}: {count} nodes")
 
     DegreeDistribution.plot(distribution)
 
 
 def test():
-    graph = GraphGeneration.erdos_graph_m(100, 500)
-    # graph = GraphGeneration.tp3_graph(100, 0.9, 0.1)
+    N=100
+    M=500
+    print(f"Generate an erdos graph G(n={N}, m={M}) ")
+    graph = GraphGeneration.erdos_graph_m(N, M)
     compute(graph, 10)
 
 

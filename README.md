@@ -28,9 +28,3 @@ make benchmark
 make tests
 make tests_verbose
 ```
-
-## Exercise 
-> Let $\epsilon \in ]0, 1[$ \
-> Can we have Erdös-Reyni $G(n, p)$ or $G(n, M)$ such that $\Delta$ (max degree) $\in O(n^{1 - \epsilon})$ ?
-
-> In this case, what are the clustering coefficients?
