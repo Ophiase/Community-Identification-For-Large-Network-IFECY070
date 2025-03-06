@@ -16,11 +16,11 @@ from logic.node_partition import NodePartition
 from visualization.partition_visualization import PartitionVisualization
 
 BENCHMARK_OUTPUT: str = os.path.join("output", "benchmark.csv")
-TIMEOUT: float = 2.0
+TIMEOUT: float = 60.0
 N_NODES = [
     50,
     int(1e2),
-    # int(1e3),
+    int(1e3),
     # int(1e4)
 ]
 
