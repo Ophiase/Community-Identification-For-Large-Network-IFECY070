@@ -1,9 +1,9 @@
-# [📔 Homework - 🌐 Large Networks of Interactions](https://github.com/Ophiase/HomeWork-3-Large-Network-IFECY070)
+# [📔 Community Identification - 🌐 Large Networks of Interactions](https://github.com/Ophiase/HomeWork-3-Large-Network-IFECY070)
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.11.5+](https://img.shields.io/badge/Python-3.11.5%2B-yellow.svg)](https://www.python.org/)
 
-Demonstration of community identification in large networks of interactions.
+Demonstration of community detection in large interaction networks for a course assignment.
 
 ## Installation
 
